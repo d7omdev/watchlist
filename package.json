@@ -1,0 +1,77 @@
+{
+  "name": "watchlist",
+  "version": "1.0.0",
+  "description": "Simple and modern web app to track your favorite movies and TV shows",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start:frontend": "cd frontend && npm run preview",
+    "start:backend": "cd backend && npm start",
+    "start": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run start:backend\" \"npm run start:frontend\"",
+    "db:check": "node setup-mysql.js",
+    "db:setup": "npm run db:check && cd backend && npm run db:generate && npm run db:migrate",
+    "db:seed": "cd backend && npm run db:seed",
+    "test:build": "npm run build && echo '✅ SUCCESS: Build test passed!'",
+    "setup": "npm run install:all && npm run db:setup && echo '✅ SUCCESS: Setup complete! Run npm run dev to start development servers'",
+    "health": "node check-health.js",
+    "test:mysql": "node test-mysql.js",
+    "clean": "rm -rf frontend/dist frontend/node_modules backend/dist backend/node_modules node_modules && echo '✅ Cleaned all dependencies and build files'",
+    "lint": "cd frontend && npm run lint && cd ../backend && echo 'Backend linting not configured'",
+    "type-check": "cd frontend && npm run type-check && cd ../backend && npx tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/watchlist.git"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "nodejs",
+    "express",
+    "mysql",
+    "drizzle-orm",
+    "shadcn-ui",
+    "tailwindcss",
+    "vite",
+    "watchlist",
+    "movies",
+    "tv-shows",
+    "tracker",
+    "entertainment"
+  ],
+  "author": {
+    "name": "D7om",
+    "email": "hello@d7om.dev",
+    "url": "https://d7om.dev"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/your-username/watchlist/issues"
+  },
+  "homepage": "https://github.com/your-username/watchlist#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@openauthjs/openauth": "^0.4.3",
+    "mysql2": "^3.14.2",
+    "typescript": "^5.8.3",
+    "uploadthing": "^7.7.3",
+    "valibot": "^1.1.0"
+  },
+  "private": false,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
