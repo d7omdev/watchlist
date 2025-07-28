@@ -59,6 +59,9 @@ const baseData = [
 // Generate 100 entries by cloning and modifying baseData
 const sampleData = Array.from({ length: 100 }, (_, i) => {
   const base = baseData[i % baseData.length];
+  if (!base) {
+    throw new Error(`Base data not found for index ${i % baseData.length}`);
+  }
   return {
     ...base,
     title: `${base.title} (${i + 1})`,

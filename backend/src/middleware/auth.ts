@@ -7,11 +7,12 @@ interface AuthRequest extends Request {
   user?: { id: number; email: string; name: string };
 }
 
-export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Missing or invalid Authorization header' });
+    res.status(401).json({ error: 'Missing or invalid Authorization header' });
+    return;
   }
   
   const token = authHeader.replace('Bearer ', '');
@@ -25,6 +26,7 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
     };
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    res.status(401).json({ error: 'Invalid or expired token' });
+    return;
   }
 }

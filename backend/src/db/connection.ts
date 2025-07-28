@@ -6,7 +6,7 @@ import * as schema from './schema';
 dotenv.config();
 
 const connection = mysql.createPool({
-  uri: process.env.DATABASE_URL,
+  uri: process.env.DATABASE_URL!,
 });
 
 export const db = drizzle(connection, { schema, mode: 'default' });

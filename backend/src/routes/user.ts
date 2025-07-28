@@ -16,8 +16,11 @@ const updateProfileSchema = z.object({
 });
 
 // Middleware to require authentication and set req.user
-function requireAuth(req: UserRequest, res: Response, next: NextFunction) {
-    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+function requireAuth(req: UserRequest, res: Response, next: NextFunction): void {
+    if (!req.user) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+    }
     next();
 }
 
@@ -28,11 +31,12 @@ router.get('/profile', requireAuth, async (req: UserRequest, res: Response) => {
         if (!user.length) return res.status(404).json({ error: 'User not found' });
         
         // Remove password from response
-        const { password, ...userWithoutPassword } = user[0];
-        res.json(userWithoutPassword);
+        const foundUser = user[0]!;
+        const { password, ...userWithoutPassword } = foundUser;
+        return res.json(userWithoutPassword);
     } catch (error) {
         console.error('Error fetching user profile:', error);
-        res.status(500).json({ error: 'Failed to fetch profile' });
+        return res.status(500).json({ error: 'Failed to fetch profile' });
     }
 });
 
@@ -54,14 +58,15 @@ router.put('/profile', requireAuth, async (req: UserRequest, res: Response) => {
         const updatedUser = await db.select().from(users).where(eq(users.id, req.user!.id)).limit(1);
         
         // Remove password from response
-        const { password, ...userWithoutPassword } = updatedUser[0];
-        res.json(userWithoutPassword);
+        const foundUser = updatedUser[0]!;
+        const { password, ...userWithoutPassword } = foundUser;
+        return res.json(userWithoutPassword);
     } catch (error) {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ error: 'Validation failed', details: error.issues });
         }
         console.error('Error updating user profile:', error);
-        res.status(500).json({ error: 'Failed to update profile' });
+        return res.status(500).json({ error: 'Failed to update profile' });
     }
 });
 

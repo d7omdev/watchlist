@@ -48,20 +48,25 @@ router.post("/register", async (req: Request, res: Response) => {
       .where(eq(users.id, result[0].insertId))
       .limit(1);
 
+    if (newUser.length === 0) {
+      return res.status(500).json({ error: "Failed to create user" });
+    }
+
+    const user = newUser[0]!;
     // Generate JWT
     const token = jwt.sign(
-      { id: newUser[0].id, email: newUser[0].email, name: newUser[0].name },
+      { id: user.id, email: user.email, name: user.name },
       JWT_SECRET,
       { expiresIn: "7d" },
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       token,
       user: {
-        id: newUser[0].id,
-        name: newUser[0].name,
-        email: newUser[0].email,
-        avatarUrl: newUser[0].avatarUrl,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
       },
     });
   } catch (error) {
@@ -71,7 +76,7 @@ router.post("/register", async (req: Request, res: Response) => {
         .json({ error: "Validation failed", details: error.issues });
     }
     console.error("Registration error:", error);
-    res.status(500).json({ error: "Failed to register user" });
+    return res.status(500).json({ error: "Failed to register user" });
   }
 });
 
@@ -91,25 +96,26 @@ router.post("/login", async (req: Request, res: Response) => {
     }
 
     // Check password
-    const isValidPassword = await bcrypt.compare(password, user[0].password);
+    const isValidPassword = await bcrypt.compare(password, user[0]!.password);
     if (!isValidPassword) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    const foundUser = user[0]!;
     // Generate JWT
     const token = jwt.sign(
-      { id: user[0].id, email: user[0].email, name: user[0].name },
+      { id: foundUser.id, email: foundUser.email, name: foundUser.name },
       JWT_SECRET,
       { expiresIn: "7d" },
     );
 
-    res.json({
+    return res.json({
       token,
       user: {
-        id: user[0].id,
-        name: user[0].name,
-        email: user[0].email,
-        avatarUrl: user[0].avatarUrl,
+        id: foundUser.id,
+        name: foundUser.name,
+        email: foundUser.email,
+        avatarUrl: foundUser.avatarUrl,
       },
     });
   } catch (error) {
@@ -119,7 +125,7 @@ router.post("/login", async (req: Request, res: Response) => {
         .json({ error: "Validation failed", details: error.issues });
     }
     console.error("Login error:", error);
-    res.status(500).json({ error: "Failed to login" });
+    return res.status(500).json({ error: "Failed to login" });
   }
 });
 

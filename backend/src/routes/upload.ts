@@ -13,10 +13,10 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadsDir);
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(
       null,
@@ -30,7 +30,7 @@ const upload = multer({
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     // Check file type
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
@@ -48,15 +48,15 @@ router.post("/image", upload.single("image"), (req: Request, res: Response) => {
     }
 
     const imageUrl = `/uploads/${req.file.filename}`;
-    res.json({ imageUrl });
+    return res.json({ imageUrl });
   } catch (error) {
     console.error("Upload error:", error);
-    res.status(500).json({ error: "Failed to upload image" });
+    return res.status(500).json({ error: "Failed to upload image" });
   }
 });
 
 // Error handling middleware for multer
-router.use((error: any, req: Request, res: Response, next: any) => {
+router.use((error: any, _req: Request, res: Response, _next: any) => {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
       return res
@@ -67,7 +67,7 @@ router.use((error: any, req: Request, res: Response, next: any) => {
   if (error.message === "Only image files are allowed!") {
     return res.status(400).json({ error: error.message });
   }
-  res.status(500).json({ error: "Upload failed" });
+  return res.status(500).json({ error: "Upload failed" });
 });
 
 export default router;

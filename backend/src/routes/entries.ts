@@ -52,7 +52,7 @@ router.get(
       const total = totalCount.length;
       const hasMore = offset + limit < total;
 
-      res.json({
+      return res.json({
         data: allEntries,
         pagination: {
           page,
@@ -63,7 +63,7 @@ router.get(
       });
     } catch (error) {
       console.error("Error fetching entries:", error);
-      res.status(500).json({ error: "Failed to fetch entries" });
+      return res.status(500).json({ error: "Failed to fetch entries" });
     }
   },
 );
@@ -86,10 +86,10 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "Entry not found" });
     }
 
-    res.json(entry[0]);
+    return res.json(entry[0]);
   } catch (error) {
     console.error("Error fetching entry:", error);
-    res.status(500).json({ error: "Failed to fetch entry" });
+    return res.status(500).json({ error: "Failed to fetch entry" });
   }
 });
 
@@ -107,7 +107,7 @@ router.post("/", async (req: EntryRequest, res: Response) => {
       .from(entries)
       .where(eq(entries.id, newEntry[0].insertId))
       .limit(1);
-    res.status(201).json(createdEntry[0]);
+    return res.status(201).json(createdEntry[0]);
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
       return res
@@ -115,14 +115,14 @@ router.post("/", async (req: EntryRequest, res: Response) => {
         .json({ error: "Validation failed", details: error });
     }
     console.error("Error creating entry:", error);
-    res.status(500).json({ error: "Failed to create entry" });
+    return res.status(500).json({ error: "Failed to create entry" });
   }
 });
 
 // PUT /api/entries/:id - Update entry
 router.put("/:id", async (req: EntryRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id!);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid entry ID" });
     }
@@ -146,7 +146,7 @@ router.put("/:id", async (req: EntryRequest, res: Response) => {
       .from(entries)
       .where(eq(entries.id, id))
       .limit(1);
-    res.json(updatedEntry[0]);
+    return res.json(updatedEntry[0]);
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
       return res
@@ -154,7 +154,7 @@ router.put("/:id", async (req: EntryRequest, res: Response) => {
         .json({ error: "Validation failed", details: error });
     }
     console.error("Error updating entry:", error);
-    res.status(500).json({ error: "Failed to update entry" });
+    return res.status(500).json({ error: "Failed to update entry" });
   }
 });
 
@@ -178,10 +178,10 @@ router.delete("/:id", async (req, res) => {
 
     await db.delete(entries).where(eq(entries.id, id));
 
-    res.status(204).send();
+    return res.status(204).send();
   } catch (error) {
     console.error("Error deleting entry:", error);
-    res.status(500).json({ error: "Failed to delete entry" });
+    return res.status(500).json({ error: "Failed to delete entry" });
   }
 });
 
