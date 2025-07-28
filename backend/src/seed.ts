@@ -1,5 +1,6 @@
 import { db } from "./db/connection";
-import { entries } from "./db/schema";
+import { entries, users } from "./db/schema";
+import bcrypt from "bcryptjs";
 
 const baseData = [
   {
@@ -62,6 +63,7 @@ const sampleData = Array.from({ length: 100 }, (_, i) => {
     ...base,
     title: `${base.title} (${i + 1})`,
     yearTime: `${parseInt(base.yearTime.slice(0, 4)) + (i % 30)}`, // vary year
+    userId: 1, // Associate with test user
   };
 });
 
@@ -69,12 +71,35 @@ async function seed() {
   try {
     console.log("Seeding database...");
 
+    // Create test user if it doesn't exist
+    const hashedPassword = await bcrypt.hash("password123", 12);
+    
+    try {
+      await db.insert(users).values({
+        id: 1,
+        name: "Test User",
+        email: "hello@d7om.dev",
+        password: hashedPassword,
+      });
+      console.log("✅ Created test user: hello@d7om.dev (password: password123)");
+    } catch (error: any) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        console.log("ℹ️  Test user already exists");
+      } else {
+        throw error;
+      }
+    }
+
+    // Add sample entries
     for (const entry of sampleData) {
       await db.insert(entries).values(entry);
       console.log(`Added: ${entry.title}`);
     }
 
     console.log("Database seeded successfully!");
+    console.log("🔑 Test user credentials:");
+    console.log("   Email: hello@d7om.dev");
+    console.log("   Password: password123");
     process.exit(0);
   } catch (error) {
     console.error("Error seeding database:", error);

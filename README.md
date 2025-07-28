@@ -61,6 +61,26 @@ Before getting started, ensure you have the following installed:
 
 ## Quick Start
 
+### Option 1: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/d7omdev/watchlist.git
+cd watchlist/backend
+
+# Copy environment file and configure
+cp .env.example .env
+# Edit .env with your preferred settings
+
+# Start with Docker Compose
+docker-compose up -d
+
+# The backend will be available at http://localhost:3001
+# Database will be available at localhost:3306
+```
+
+### Option 2: Manual Setup
+
 ```bash
 # Clone and setup
 git clone https://github.com/d7omdev/watchlist.git
@@ -323,6 +343,54 @@ PORT=3001
 # 3. Configure build settings:
 #    - Build Command: npm run build
 #    - Start Command: npm start
+```
+
+### Docker Deployment
+
+#### Using Docker Compose (Recommended)
+```bash
+# 1. Clone repository and navigate to backend
+cd backend
+
+# 2. Copy and configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# 3. Start services
+docker-compose up -d
+
+# 4. Check logs
+docker-compose logs -f backend
+```
+
+#### Using Dockerfile only
+```bash
+# Build the image
+docker build -t watchlist-backend .
+
+# Run with environment file
+docker run -d \
+  --name watchlist-backend \
+  --env-file .env \
+  -p 3001:3001 \
+  watchlist-backend
+```
+
+#### Environment Variables for Docker
+The Docker setup automatically reads from a `.env` file in the backend directory. Key variables:
+
+```env
+# Database (automatically configured in docker-compose)
+DATABASE_URL=mysql://watchlist_user:watchlist_password@db:3306/watchlist
+
+# Authentication
+JWT_SECRET=your-super-secure-jwt-secret-key
+JWT_EXPIRES_IN=7d
+
+# Server
+NODE_ENV=production
+PORT=3001
+CORS_ORIGIN=http://localhost:5173
 ```
 
 #### Database Options

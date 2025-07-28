@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: watchlist-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: watchlist
+      MYSQL_USER: watchlist_user
+      MYSQL_PASSWORD: watchlist_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend API
+  backend:
+    build: .
+    container_name: watchlist-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mysql://watchlist_user:watchlist_password@db:3306/watchlist
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        npm run db:generate &&
+        npm run db:migrate &&
+        echo 'Seeding database with test data...' &&
+        npm run db:seed &&
+        echo 'Starting application...' &&
+        npm start
+      "
+
+volumes:
+  mysql_data:
